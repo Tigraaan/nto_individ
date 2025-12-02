@@ -274,44 +274,7 @@ class FinalChampion:
             
         except Exception as e:
             print(f"Критическая ошибка: {e}")
-            return self.create_perfect_backup()
     
-    def create_perfect_backup(self):
-        """Идеальное резервное решение"""
-        print("🛡️ СОЗДАНИЕ ИДЕАЛЬНОГО РЕЗЕРВА...")
-        
-        train = self.smart_read_csv('train.csv')
-        test = self.smart_read_csv('test.csv')
-        
-        user_col = train.columns[0]
-        book_col = train.columns[1]
-        
-        train = train.rename(columns={user_col: 'user_id', book_col: 'book_id'})
-        test = test.rename(columns={user_col: 'user_id', book_col: 'book_id'})
-        
-        rating_col = [c for c in train.columns if 'rating' in c.lower()][0]
-        train = train.rename(columns={rating_col: 'rating'})
-        
-        if 'has_read' in train.columns:
-            train = train[train['has_read'] == 1]
-        
-        user_means = train.groupby('user_id')['rating'].mean()
-        book_means = train.groupby('book_id')['rating'].mean()
-        global_mean = train['rating'].mean()
-        
-        predictions = []
-        for _, row in test.iterrows():
-            user_pred = user_means.get(row['user_id'], global_mean)
-            book_pred = book_means.get(row['book_id'], global_mean)
-            pred = (user_pred * 0.65 + book_pred * 0.35) * 1.018  # Формула
-            predictions.append(pred)
-        
-        submission = test[['user_id', 'book_id']].copy()
-        submission['rating_predict'] = np.clip(predictions, 1, 10)
-        submission.to_csv('perfect_backup.csv', index=False)
-        
-        print("Cоздан!")
-        return submission
     
     def champion_analysis(self, submission, train):
         """Анализ"""
